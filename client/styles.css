@@ -1,0 +1,12 @@
+
+#main{
+    width:100%;
+}
+#stockchart{
+    margin: auto;
+    width: 800px;
+}
+
+.d3StockChart{
+    background-color: lightgrey;
+}
