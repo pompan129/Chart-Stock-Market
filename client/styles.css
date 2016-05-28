@@ -8,5 +8,21 @@
 }
 
 .d3StockChart{
-    background-color: lightgrey;
+    background-color: #666666;
+}
+
+.axis path,
+.axis line{
+    fill: none;
+    stroke: #c0c0c0;
+    shape-rendering: crispEdges;
+}
+.axis text{
+    fill: #c0c0c0;
+}
+
+.trendline{
+    fill: none;
+    stroke: #ffcd56;
+    stroke-width: 2px;
 }

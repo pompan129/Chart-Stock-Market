@@ -45,13 +45,13 @@ class d3StockChart{
 
     }
     update(newData){
-        this.options = {...this.options, elem:newData.elem,data:newData.data}
-        this.setScalesAndAxis();
+        this.options = {...this.options, elem:newData.elem,data:newData.data};
+        this.setScalesAxisLine();
         this.plot.call(this._chart,this.options);
 
     }
 
-    setScalesAndAxis(){
+    setScalesAxisLine(){
         const options = this.options;
         options.yScale = d3.scale.linear()
             .domain([0,d3.max(options.data.map(function(stockArray) {
@@ -80,42 +80,75 @@ class d3StockChart{
             .scale(options.xScale)
             .orient("bottom")
             .ticks(d3.time.months, 1)
-            .tickFormat(d3.time.format("%m/%Y"));
+            .tickFormat(d3.time.format("%m/%y"));
 
         options.yAxis = d3.svg.axis()
             .scale(options.yScale)
-            .orient("left")
-            .ticks(5);
+            .orient("left");
 
+        options.line = d3.svg.line()
+            .x(function(d){
+                var date = options.dateparser(d.date);
+                return options.xScale(date);
+            })
+            .y(function(d){
+                return options.yScale(d.closing);
+            });
     }
 
     plot(options){
         const params = options.data;
         const dateParser = options.dateparser;
         //axis
-        this.append("g")
-            .classed("x axis", true)
-            .attr("transform", "translate(0," + options.height + ")")
-            .call(options.xAxis);
-        this.append("g")
-            .classed("y axis", true)
-            .attr("transform", "translate(0,0)")
-            .call(options.yAxis);
+        //create x axis if not present. Transition if x axis is present
+        if(this.select(".x.axis").empty()){
+            this.append("g")
+                .classed("x axis", true)
+                .attr("transform", "translate(0," + options.height + ")")
+                .call(options.xAxis);
+        }else{
+            let chartTransition = this.transition();
+            chartTransition.select(".x.axis") // change the x axis
+                .duration(750)
+                .call(options.xAxis);
+        }
+        //create y axis if not present. Transition if y axis is present
+        if(this.select(".y.axis").empty()){
+            this.append("g")
+                .classed("y axis", true)
+                .attr("transform", "translate(0,0)")
+                .call(options.yAxis);
+        }else{
+            let chartTransition = this.transition();
+            chartTransition.select(".y.axis") // change the x axis
+                .duration(750)
+                .call(options.yAxis);
+        }
 
 
         //enter
         for(let i = 0, len = params.length;i<len;i++){
-            this.selectAll(".point-" + params[i].symbol)
+            this.selectAll("." + params[i].symbol)
+                .data([params[i].data])
+                .enter()
+                    .append("path")
+                    .classed("trendline",true)
+                    .classed(params[i].symbol, true);
+            /*this.selectAll(".point-" + params[i].symbol)
                 .data(params[i].data)
                 .enter()
-                .append("circle")
-                .classed("point-" + params[i].symbol, true)
-                .attr("r", 2);
+                    .append("circle")
+                    .classed("point-" + params[i].symbol, true)
+                    .attr("r", 2);*/
         }
 
 
         //update
         for(let i = 0, len = params.length;i<len;i++){
+            this.selectAll("." + params[i].symbol)
+                .attr("d", function(d){
+                    return options.line(d);
+                });
             this.selectAll(".point-" + params[i].symbol)
                 .attr("cx", function(d){
                     var date = dateParser(d.date);
@@ -128,6 +161,10 @@ class d3StockChart{
 
         //exit
         for(let i = 0, len = params.length;i<len;i++){
+            this.selectAll("." + params[i].symbol)
+                .data([params[i].data])
+                .exit()
+                .remove();
             this.selectAll(".point-" + params[i].symbol)
                 .data(params[i].data)
                 .exit()
