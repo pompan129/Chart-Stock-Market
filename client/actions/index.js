@@ -3,6 +3,7 @@
  */
 import d3 from "d3";
 import axios from "axios";
+import Promise from "promise";
 
 const YEAR_IN_MILLS = 1000 * 60 * 60 * 24 * 365;
 const START_DATE = new Date(Date.now() - YEAR_IN_MILLS);

@@ -10,17 +10,10 @@ import { bindActionCreators } from 'redux';
 import {fetchStockData,removeStock} from "../actions/index";
 
 
-let stock_symbols = ["AAPL","MMM","ENTG"];//todo
-
-
 class App extends Component{
     constructor(props){
         super(props);
     }
-    componentWillMount(){
-        this.props.fetchStockData(stock_symbols);
-    }
-
     render(){
         if(!this.props.stocks.data){return null}
         return (

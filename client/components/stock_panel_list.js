@@ -12,7 +12,7 @@ class StockPanelList extends Component{
     }
 
     render(){
-        if(this.props.stocks.error.is === true){this.handleFetchStockError(this.props.stocks.error.message)}
+        if(this.props.stocks.error.state === true){this.handleFetchStockError(this.props.stocks.error.message)}
         return (
             <div>
                 {this.props.stocks.data.map((stock)=>{
