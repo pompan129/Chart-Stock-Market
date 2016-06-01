@@ -2,7 +2,7 @@
  * Created by fazbat on 5/31/2016.
  */
 var io = require('socket.io');
-var mongoose = require('mongoose');
+var mongoose = require ("mongoose");
 var Stock = require("./models/stocks");//Stock model for mongodb/mongoose
 
 mongoose.connect("mongodb://fazbat:pass2964@ds019482.mlab.com:19482/kj-db");
