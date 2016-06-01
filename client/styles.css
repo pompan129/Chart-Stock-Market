@@ -1,0 +1,34 @@
+
+#main{
+    width:100%;
+}
+.app-root{
+    margin: 30px auto;
+    width: 800px;
+}
+
+.d3StockChart{
+    background-color: #5d5d5d;
+}
+
+.axis path,
+.axis line{
+    fill: none;
+    stroke: #c0c0c0;
+    shape-rendering: crispEdges;
+}
+.axis text{
+    fill: #c0c0c0;
+}
+
+.trendline{
+    fill: none;
+    stroke-width: 2px;
+}
+.panel-body{
+    height: 120px;
+    overflow: auto;
+}
+.panel .panel-heading{
+    font-weight: bold;
+}
