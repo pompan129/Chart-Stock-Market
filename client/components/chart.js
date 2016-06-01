@@ -14,7 +14,6 @@ export default class Chart extends Component{
         this.chart.create();
     }
     componentDidUpdate(){
-        console.log("componentDidUpdate",this.props.stocks.data);//todo
         const elem = document.getElementById(this.props.id);
         this.chart.update({elem:elem, data:this.props.stocks.data,colors:this.props.colors});
     }

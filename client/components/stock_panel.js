@@ -13,8 +13,6 @@ class StockPanel extends Component{
 
     handleRemoveStockClick(){
         this.props.removeStock(this.props.symbol);
-        console.log("handleRemoveStockClick",this.props.symbol);//todo
-
     };
 
     render(){

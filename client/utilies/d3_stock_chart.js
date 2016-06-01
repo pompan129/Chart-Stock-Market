@@ -98,8 +98,7 @@ class d3StockChart{
 
     plot(options){
         const params = options.data;
-        //const dateParser = options.dateparser;todo
-
+        
         //remove previous lines
         this.selectAll(".trendline").remove();
 
