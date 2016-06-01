@@ -4,9 +4,10 @@
 import React,{Component} from "react";
 import Chart from "./chart";
 import SearchBar from "./searchbar";
+import StockPanelList from "./stock_panel_list"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import {fetchStockData} from "../actions/index";
+import {fetchStockData,removeStock} from "../actions/index";
 
 
 let stock_symbols = ["AAPL","MMM","ENTG"];//todo
@@ -17,14 +18,18 @@ class App extends Component{
         super(props);
     }
     componentWillMount(){
-        console.log("componentWillMount>>>>");//todo
         this.props.fetchStockData(stock_symbols);
     }
 
     render(){
+        if(!this.props.stocks.data){return null}
         return (
-            <div>
-                <Chart id="stockchart" data={this.props.data}/>
+            <div className="app-root">
+                <Chart id="stockchart" stocks={this.props.stocks} colors={this.props.colors}/>
+                <StockPanelList
+                    stocks={this.props.stocks}
+                    colors={this.props.colors}
+                    removeStock={this.props.removeStock} />
                 <SearchBar />
             </div>
             
@@ -33,10 +38,21 @@ class App extends Component{
     }
 }
 
+App.propTypes = {
+    data: React.PropTypes.array,
+    removeStock:React.PropTypes.func,
+    fetchStockData:React.PropTypes.func,
+    colors: React.PropTypes.object
+};
+
 function mapStateToProps(state){
-    return {data: state.data}
+    console.log("STATE:",state);//todo
+    return {
+        stocks: state.stocks,
+        colors:state.colors
+    }
 }
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ fetchStockData }, dispatch);
+    return bindActionCreators({ fetchStockData, removeStock }, dispatch);
 }
 export default connect(mapStateToProps,mapDispatchToProps)(App);

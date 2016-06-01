@@ -43,6 +43,11 @@ class SearchBar extends Component {
     }
 }
 
+SearchBar.propTypes = {
+    addNewStock: React.PropTypes.func
+};
+
+
 function mapDispatchToProps(dispatch){
     return bindActionCreators({ addNewStock }, dispatch);
 }

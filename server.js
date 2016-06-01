@@ -11,15 +11,15 @@ app.use(express.static(__dirname + '/client'));
 app.get("/",function (req,res){
     res.sendFile("/index.html");
 });
-/* todo websockets
+
 io.on("connection",function (socket) {
     console.log("a user connected");
 
     socket.on("disconnect",function () {
         console.log("user has disconnected");
     })
-})
-*/
+});
+
 app.set('port', (process.env.PORT || 5000));
 
 app.listen(app.get('port'), function() {

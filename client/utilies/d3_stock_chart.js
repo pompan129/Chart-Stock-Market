@@ -8,14 +8,15 @@ const optionPresets = {
     w:800,
     h:450,
     margin:{
-        top: 58,
-        bottom: 100,
-        left: 80,
+        top: 30,
+        bottom: 50,
+        left: 50,
         right: 40
     },
     xScale:null,
     yScale:null,
     data: null,
+    colors:null,
     dateparser: d3.time.format("%Y-%m-%d").parse,
     color:d3.scale.category20()
 };
@@ -26,7 +27,7 @@ optionPresets.height = optionPresets.h - optionPresets.margin.top - optionPreset
 
 class d3StockChart{
     constructor(options = optionPresets){
-        this.options = {...optionPresets,data:options.data,elem:options.elem};
+        this.options = Object.assign({},optionPresets,options);
     }
 
     create(){
@@ -45,10 +46,9 @@ class d3StockChart{
 
     }
     update(newData){
-        this.options = {...this.options, elem:newData.elem,data:newData.data};
+        if(newData){this.options = Object.assign({},this.options,newData)}
         this.setScalesAxisLine();
         this.plot.call(this._chart,this.options);
-
     }
 
     setScalesAxisLine(){
@@ -98,7 +98,11 @@ class d3StockChart{
 
     plot(options){
         const params = options.data;
-        const dateParser = options.dateparser;
+        //const dateParser = options.dateparser;todo
+
+        //remove previous lines
+        this.selectAll(".trendline").remove();
+
         //axis
         //create x axis if not present. Transition if x axis is present
         if(this.select(".x.axis").empty()){
@@ -133,40 +137,24 @@ class d3StockChart{
                 .enter()
                     .append("path")
                     .classed("trendline",true)
-                    .classed(params[i].symbol, true);
-            /*this.selectAll(".point-" + params[i].symbol)
-                .data(params[i].data)
-                .enter()
-                    .append("circle")
-                    .classed("point-" + params[i].symbol, true)
-                    .attr("r", 2);*/
+                    .classed(params[i].symbol, true)
+                    .attr("stroke",options.colors[params[i].symbol]);
         }
 
 
         //update
         for(let i = 0, len = params.length;i<len;i++){
-            this.selectAll("." + params[i].symbol)
+            this.selectAll("." + params[i].symbol).transition()
+                .duration(500)
                 .attr("d", function(d){
                     return options.line(d);
                 });
-            this.selectAll(".point-" + params[i].symbol)
-                .attr("cx", function(d){
-                    var date = dateParser(d.date);
-                    return options.xScale(date);
-                })
-                .attr("cy", function(d){
-                    return options.yScale(d.closing);
-                })
         }
 
         //exit
         for(let i = 0, len = params.length;i<len;i++){
             this.selectAll("." + params[i].symbol)
                 .data([params[i].data])
-                .exit()
-                .remove();
-            this.selectAll(".point-" + params[i].symbol)
-                .data(params[i].data)
                 .exit()
                 .remove();
         }

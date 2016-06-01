@@ -2,13 +2,13 @@
 #main{
     width:100%;
 }
-#stockchart{
-    margin: auto;
+.app-root{
+    margin: 30px auto;
     width: 800px;
 }
 
 .d3StockChart{
-    background-color: #666666;
+    background-color: #5d5d5d;
 }
 
 .axis path,
@@ -23,6 +23,13 @@
 
 .trendline{
     fill: none;
-    stroke: #ffcd56;
+    /*stroke: #ffcd56;  todo*/
     stroke-width: 2px;
+}
+.panel-body{
+    height: 120px;
+    overflow: auto;
+}
+.panel .panel-heading{
+    font-weight: bold;
 }
