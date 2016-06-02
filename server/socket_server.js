@@ -5,7 +5,7 @@ var io = require('socket.io');
 var mongoose = require ("mongoose");
 var Stock = require("./models/stocks");//Stock model for mongodb/mongoose
 
-mongoose.connect("mongodb://fazbat:pass2964@ds019482.mlab.com:19482/kj-db");
+mongoose.connect("mongodb://fazbat:" + process.env.DB_PASS + "@ds019482.mlab.com:19482/kj-db");
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));//check connection for errors
 db.once('open', function() {
