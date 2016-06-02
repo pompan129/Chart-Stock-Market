@@ -21976,7 +21976,7 @@
 	        case _index.REMOVE_STOCK:
 	            return _extends({}, state, { data: state.data.filter(function (stock) {
 	                    return !(action.payload == stock.symbol);
-	                }) });
+	                }), fetchingstock: false, error: { message: "", state: false } });
 	    }
 	    return state;
 	};
@@ -22066,13 +22066,13 @@
 
 	//addNewStock
 	function addNewStock(symbol) {
+
 	    return function (dispatch) {
 	        dispatch({ //set state to fetching data. Spinner?
 	            type: FETCHING_STOCK_DATA
 	        });
 
 	        _axios2.default.get(BASE_URL + symbol.trim() + URL_PARAMS).then(function (resp) {
-	            console.log("axios.get/resp", resp);
 	            var data = {
 	                symbol: resp.data.dataset.dataset_code,
 	                description: resp.data.dataset.name,
@@ -34024,7 +34024,19 @@
 	    data: null,
 	    colors: null,
 	    dateparser: _d2.default.time.format("%Y-%m-%d").parse,
-	    color: _d2.default.scale.category20()
+	    color: _d2.default.scale.category20(),
+	    tool_style: {
+	        position: "absolute",
+	        "text-align": "center",
+	        width: "auto",
+	        height: "auto",
+	        padding: "2px",
+	        font: "12px sans-serif",
+	        background: "lightsteelblue",
+	        border: "0px",
+	        "border-radius": "8px",
+	        "pointer-events": "none"
+	    }
 	};
 	optionPresets.width = optionPresets.w - optionPresets.margin.left - optionPresets.margin.right;
 	optionPresets.height = optionPresets.h - optionPresets.margin.top - optionPresets.margin.bottom;
@@ -34047,6 +34059,7 @@
 
 	            this._svg = svg;
 	            this._chart = chart;
+	            options.tooltip = _d2.default.select("body").append("div").classed("tooltip", true).style(options.tool_style).style("opacity", 0);
 	            options.data && this.update();
 	        }
 	    }, {
@@ -34092,10 +34105,13 @@
 	    }, {
 	        key: "plot",
 	        value: function plot(options) {
-	            var params = options.data;
+	            var stocks = options.data;
+	            console.log("in d3,stocks=", stocks); //todo
+	            var tooltip = options.tooltip;
 
 	            //remove previous lines
 	            this.selectAll(".trendline").remove();
+	            this.selectAll(".toolpoint").remove();
 
 	            //axis
 	            //create x axis if not present. Transition if x axis is present
@@ -34116,20 +34132,40 @@
 	            }
 
 	            //enter
-	            for (var i = 0, len = params.length; i < len; i++) {
-	                this.selectAll("." + params[i].symbol).data([params[i].data]).enter().append("path").classed("trendline", true).classed(params[i].symbol, true).attr("stroke", options.colors[params[i].symbol]);
+	            for (var i = 0, len = stocks.length; i < len; i++) {
+	                //lines
+	                this.selectAll(".trendline." + stocks[i].symbol).data([stocks[i].data]).enter().append("path").classed("trendline", true).classed(stocks[i].symbol, true).attr("stroke", options.colors[stocks[i].symbol]);
+
+	                //points (for tooltip)
+	                this.selectAll(".toolpoint." + stocks[i].symbol).data(stocks[i].data).enter().append("circle").classed("toolpoint", true).classed(stocks[i].symbol, true).attr("r", 2).attr("fill", options.colors[stocks[i].symbol]).style("opacity", .00001).on("mouseover", function (d, i) {
+	                    _d2.default.select(this).attr("r", 6).attr("stroke", "grey").attr("stroke-width", 3).style("opacity", .9);
+	                    tooltip.transition().duration(200).style("opacity", .9);
+	                    tooltip.html("<h3>tooltip</h3>").style("left", _d2.default.event.pageX + 50 + "px").style("top", _d2.default.event.pageY - 40 + "px");
+	                }).on("mouseout", function (d, i) {
+	                    _d2.default.select(this).attr("r", 2).attr("stroke-width", 0).style("opacity", .00001);
+	                    tooltip.transition().duration(500).style("opacity", 0);
+	                });
+	                //.attr("fill",options.colors[stocks[i].symbol])
 	            }
 
 	            //update
-	            for (var _i = 0, _len = params.length; _i < _len; _i++) {
-	                this.selectAll("." + params[_i].symbol).transition().duration(500).attr("d", function (d) {
+	            for (var _i = 0, _len = stocks.length; _i < _len; _i++) {
+	                this.selectAll(".trendline." + stocks[_i].symbol).transition().duration(500).attr("d", function (d) {
 	                    return options.line(d);
+	                });
+
+	                this.selectAll(".toolpoint." + stocks[_i].symbol).attr("cx", function (d) {
+	                    var date = options.dateparser(d.date);
+	                    return options.xScale(date);
+	                }).attr("cy", function (d) {
+	                    return options.yScale(d.closing);
 	                });
 	            }
 
 	            //exit
-	            for (var _i2 = 0, _len2 = params.length; _i2 < _len2; _i2++) {
-	                this.selectAll("." + params[_i2].symbol).data([params[_i2].data]).exit().remove();
+	            for (var _i2 = 0, _len2 = stocks.length; _i2 < _len2; _i2++) {
+	                this.selectAll(".trendline." + stocks[_i2].symbol).data([stocks[_i2].data]).exit().remove();
+	                this.selectAll(".toolpoint." + stocks[_i2].symbol).data(stocks[_i2].data).exit().remove();
 	            }
 	        }
 	    }]);
@@ -34188,7 +34224,7 @@
 
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SearchBar).call(this, props));
 
-	        _this.state = { term: "" };
+	        _this.state = { term: "", error: "" };
 	        _this.onInputChange = _this.onInputChange.bind(_this);
 	        _this.onFormSubmit = _this.onFormSubmit.bind(_this);
 	        return _this;
@@ -34197,36 +34233,54 @@
 	    _createClass(SearchBar, [{
 	        key: 'onInputChange',
 	        value: function onInputChange(event) {
-	            this.setState({ term: event.target.value });
+	            this.setState({ term: event.target.value, error: null });
 	        }
 	    }, {
 	        key: 'onFormSubmit',
 	        value: function onFormSubmit(event) {
 	            event.preventDefault();
+	            var data = this.props.stocks.data;
+	            var symbol = this.state.term.trim().toUpperCase();
+	            //check for duplicates
+	            for (var i = 0, len = data.length; i < len; i++) {
+	                if (data[i].symbol == symbol) {
+	                    this.setState({ error: "Duplicate Stock Symbol!" });
+	                    return;
+	                }
+	            }
 	            this.props.addNewStock(this.state.term);
-	            this.setState({ term: '' });
+	            this.setState({ term: "", error: null });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
 
 	            return _react2.default.createElement(
-	                'form',
-	                { className: 'input-group', onSubmit: this.onFormSubmit },
-	                _react2.default.createElement('input', {
-	                    type: 'text',
-	                    placeholder: 'Enter Stock Symbol',
-	                    className: 'form-control',
-	                    value: this.state.term,
-	                    onChange: this.onInputChange }),
+	                'div',
+	                null,
 	                _react2.default.createElement(
-	                    'span',
-	                    { className: 'input-group-btn' },
+	                    'form',
+	                    { className: 'input-group', onSubmit: this.onFormSubmit },
+	                    _react2.default.createElement('input', {
+	                        type: 'text',
+	                        placeholder: 'Enter Stock Symbol',
+	                        className: 'form-control',
+	                        value: this.state.term,
+	                        onChange: this.onInputChange }),
 	                    _react2.default.createElement(
-	                        'button',
-	                        { type: 'submit', className: 'btn btn-secondary' },
-	                        'Submit'
+	                        'span',
+	                        { className: 'input-group-btn' },
+	                        _react2.default.createElement(
+	                            'button',
+	                            { type: 'submit', className: 'btn btn-secondary' },
+	                            'Submit'
+	                        )
 	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'input-error' },
+	                    this.state.error
 	                )
 	            );
 	        }
@@ -34239,11 +34293,14 @@
 	    addNewStock: _react2.default.PropTypes.func
 	};
 
+	function mapStateToProps(state) {
+	    return { stocks: state.stocks };
+	}
 	function mapDispatchToProps(dispatch) {
 	    return (0, _redux.bindActionCreators)({ addNewStock: _index.addNewStock }, dispatch);
 	}
 
-	exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(SearchBar);
+	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(SearchBar);
 
 /***/ },
 /* 228 */
