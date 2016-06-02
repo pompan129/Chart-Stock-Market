@@ -33,7 +33,7 @@ export default function (state={}, action) {
         case REMOVE_STOCK:
             return {...state,data:state.data.filter((stock)=>{
                 return !(action.payload == stock.symbol)
-            })};
+            }),fetchingstock:false,error:{message:"",state:false}};
     }
     return state;
 }

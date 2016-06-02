@@ -18,7 +18,19 @@ const optionPresets = {
     data: null,
     colors:null,
     dateparser: d3.time.format("%Y-%m-%d").parse,
-    color:d3.scale.category20()
+    color:d3.scale.category20(),
+    tool_style:{
+        position: "absolute",
+        "text-align": "center",
+        width: "auto",
+        height: "auto",
+        padding: "2px",
+        font: "12px sans-serif",
+        background: "lightsteelblue",
+        border: "0px",
+        "border-radius": "8px",
+        "pointer-events": "none"
+    }
 };
 optionPresets.width = optionPresets.w - optionPresets.margin.left - optionPresets.margin.right;
 optionPresets.height = optionPresets.h - optionPresets.margin.top - optionPresets.margin.bottom;
@@ -42,6 +54,10 @@ class d3StockChart{
 
         this._svg = svg;
         this._chart = chart;
+        options.tooltip = d3.select("body").append("div")
+            .classed("tooltip",true)
+            .style(options.tool_style)
+            .style("opacity", 0);
         options.data && this.update();
 
     }
@@ -97,10 +113,13 @@ class d3StockChart{
     }
 
     plot(options){
-        const params = options.data;
+        const stocks = options.data;
+        console.log("in d3,stocks=",stocks);//todo
+        const tooltip = options.tooltip;
         
         //remove previous lines
         this.selectAll(".trendline").remove();
+        this.selectAll(".toolpoint").remove();
 
         //axis
         //create x axis if not present. Transition if x axis is present
@@ -130,37 +149,86 @@ class d3StockChart{
 
 
         //enter
-        for(let i = 0, len = params.length;i<len;i++){
-            this.selectAll("." + params[i].symbol)
-                .data([params[i].data])
+        for(let i = 0, len = stocks.length;i<len;i++){
+            //lines
+            this.selectAll(".trendline." + stocks[i].symbol)
+                .data([stocks[i].data])
                 .enter()
                     .append("path")
                     .classed("trendline",true)
-                    .classed(params[i].symbol, true)
-                    .attr("stroke",options.colors[params[i].symbol]);
+                    .classed(stocks[i].symbol, true)
+                    .attr("stroke",options.colors[stocks[i].symbol]);
+
+            //points (for tooltip)
+            this.selectAll(".toolpoint." + stocks[i].symbol)
+                .data(stocks[i].data)
+                .enter()
+                .append("circle")
+                .classed("toolpoint",true)
+                .classed(stocks[i].symbol, true)
+                .attr("r", 2)
+                .attr("fill",options.colors[stocks[i].symbol])
+                .style("opacity", .00001)
+                .on("mouseover", function(d,i){
+                    d3.select(this)
+                        .attr("r", 6)
+                        .attr("stroke","grey")
+                        .attr("stroke-width",3)
+                        .style("opacity", .9);
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(
+                        "<h3>tooltip</h3>"
+                    )
+                        .style("left", (d3.event.pageX + 50) + "px")
+                        .style("top", (d3.event.pageY - 40) + "px");
+                })
+                .on("mouseout", function(d,i){
+                    d3.select(this)
+                        .attr("r", 2)
+                        .attr("stroke-width",0)
+                        .style("opacity", .00001);
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+            //.attr("fill",options.colors[stocks[i].symbol])
         }
 
-
         //update
-        for(let i = 0, len = params.length;i<len;i++){
-            this.selectAll("." + params[i].symbol).transition()
+        for(let i = 0, len = stocks.length;i<len;i++){
+           this.selectAll(".trendline." + stocks[i].symbol).transition()
                 .duration(500)
                 .attr("d", function(d){
                     return options.line(d);
                 });
+
+            this.selectAll(".toolpoint." + stocks[i].symbol)
+                .attr("cx", function(d){
+                    var date = options.dateparser(d.date);
+                    return options.xScale(date);
+                })
+                .attr("cy", function(d){
+                    return options.yScale(d.closing);
+                })
+
         }
+
 
         //exit
-        for(let i = 0, len = params.length;i<len;i++){
-            this.selectAll("." + params[i].symbol)
-                .data([params[i].data])
+        for(let i = 0, len = stocks.length;i<len;i++){
+            this.selectAll(".trendline." + stocks[i].symbol)
+                .data([stocks[i].data])
                 .exit()
                 .remove();
+            this.selectAll(".toolpoint." + stocks[i].symbol)
+                .data(stocks[i].data)
+                .exit()
+                .remove();
+
         }
-
     }
-
-
 }
 
 export default d3StockChart;

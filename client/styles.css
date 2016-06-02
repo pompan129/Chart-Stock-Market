@@ -32,3 +32,9 @@
 .panel .panel-heading{
     font-weight: bold;
 }
+
+.input-error{
+    color:red;
+    font-size: larger;
+    font-weight: bold;
+}

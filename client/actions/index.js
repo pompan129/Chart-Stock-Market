@@ -56,13 +56,13 @@ export function fetchStockData(stockSymbols){
 
 //addNewStock
 export function addNewStock(symbol) {
+
     return (dispatch)=>{
         dispatch({//set state to fetching data. Spinner?
             type:FETCHING_STOCK_DATA
         });
 
         axios.get(BASE_URL + symbol.trim() + URL_PARAMS).then(function(resp){
-            console.log("axios.get/resp",resp);
             const data = {
                 symbol:resp.data.dataset.dataset_code,
                 description: resp.data.dataset.name,
@@ -95,9 +95,6 @@ export function addNewStock(symbol) {
             }
         });
     }
-
-
-
 }
 
 //removeStock
