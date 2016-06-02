@@ -12,8 +12,6 @@ db.once('open', function() {
     console.log("connected to mongoLab")
 });
 
-var stock_symbols = [];//todo
-
 module.exports = function(server) {
     const socketServer = io(server);
     const connections = [];
@@ -22,8 +20,6 @@ module.exports = function(server) {
     socketServer.on('connection', (socket) => {
         connections.push(socket);
         userId += 1;
-
-        console.log("connection made",userId);//todo
 
         //send initial stock information to clients
         refreshStocksOnClients([socket]);
@@ -47,19 +43,18 @@ module.exports = function(server) {
         socket.on('disconnect', () => {
             const index = connections.indexOf(socket);
             connections.splice(index, 1);
-            console.log(userId,"has disconnected");//todo
         });
     });
 };
 
 function refreshStocksOnClients(connections,excludedConnection){
     Stock.find({},{name:1,_id:0},(err,docs)=>{
-        if(err){console.log("Error retrieving stocks from DB:",err);}//todo
+        if(err){console.log("Error retrieving stocks from DB:",err);}//todo: more robust error handing
         else{
-            stock_symbols = docs.map((obj)=>{return obj.name;});
+            const stock_symbols = docs.map((obj)=>{return obj.name;});
             connections.forEach((connectedSocket) => {
                 if (connectedSocket !== excludedConnection) {
-                    connectedSocket.emit('update-stocks', stock_symbols);//todo
+                    connectedSocket.emit('update-stocks', stock_symbols);
                 }
             });
         }

@@ -5,6 +5,11 @@
 .app-root{
     margin: 30px auto;
     width: 800px;
+    font-size: 1.25em;
+}
+.title-bar{
+    text-align: center;
+    color: #373737;
 }
 
 .d3StockChart{
@@ -26,7 +31,7 @@
     stroke-width: 2px;
 }
 .panel-body{
-    height: 120px;
+    height: 80px;
     overflow: auto;
 }
 .panel .panel-heading{
@@ -37,4 +42,8 @@
     color:red;
     font-size: larger;
     font-weight: bold;
+}
+
+.tooltip h4{
+    margin:5px;
 }

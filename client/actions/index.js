@@ -80,7 +80,6 @@ export function addNewStock(symbol) {
                 payload: data
             })
         }).catch(function (response) {
-            console.log("catch:",response);//todo
             if(response.data && response.data.quandl_error.code == "QECx02"){
                 dispatch({
                     type:ERROR_FETCHING_STOCK_DATA,

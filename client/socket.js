@@ -25,16 +25,15 @@ export function stockMiddleware(store) {
 export default function (store) {
     socket = io.connect(`${location.protocol}//${location.host}`);
 
-    socket.on('start', data => {
-        console.log("started:", data);//todo
-    });
+    /*socket.on('start', data => {
+        //todo 
+    });*/
 
-    socket.on('message', data => {
+    socket.on('message', data => {//for debugging
         console.log( data, "received from server");//todo
     });
 
     socket.on('update-stocks', (stocks) => {
         store.dispatch(fetchStockData(stocks));
-        console.log("in client/update-stocks",stocks);//todo
     });
 }

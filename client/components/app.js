@@ -4,7 +4,8 @@
 import React,{Component} from "react";
 import Chart from "./chart";
 import SearchBar from "./searchbar";
-import StockPanelList from "./stock_panel_list"
+import StockPanelList from "./stock_panel_list";
+import TitleBar from "./title_bar";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import {fetchStockData,removeStock} from "../actions/index";
@@ -18,6 +19,8 @@ class App extends Component{
         if(!this.props.stocks.data){return null}
         return (
             <div className="app-root">
+                <TitleBar title="Chart The Stock Market"
+                          description="Enter stock symbol below. See closing prices for the previous year"/>
                 <Chart id="stockchart" stocks={this.props.stocks} colors={this.props.colors}/>
                 <StockPanelList
                     stocks={this.props.stocks}
@@ -39,7 +42,6 @@ App.propTypes = {
 };
 
 function mapStateToProps(state){
-    console.log("STATE:",state);//todo
     return {
         stocks: state.stocks,
         colors:state.colors

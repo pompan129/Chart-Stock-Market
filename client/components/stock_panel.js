@@ -32,7 +32,7 @@ class StockPanel extends Component{
                             aria-hidden="true"></span>
                     </div>
                     <div className="panel-body">
-                        {this.props.description}
+                        {this.props.description.substring(0,this.props.description.indexOf(")") + 1)}
                     </div>
                 </div>
             </div>

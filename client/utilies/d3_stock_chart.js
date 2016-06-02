@@ -24,11 +24,12 @@ const optionPresets = {
         "text-align": "center",
         width: "auto",
         height: "auto",
-        padding: "2px",
+        padding: "4px",
         font: "12px sans-serif",
-        background: "lightsteelblue",
-        border: "0px",
-        "border-radius": "8px",
+        "font-weight":"bold",
+        background: "#ddd",
+        border: "2px solid",
+        "border-radius": "4px",
         "pointer-events": "none"
     }
 };
@@ -114,7 +115,6 @@ class d3StockChart{
 
     plot(options){
         const stocks = options.data;
-        console.log("in d3,stocks=",stocks);//todo
         const tooltip = options.tooltip;
         
         //remove previous lines
@@ -168,6 +168,7 @@ class d3StockChart{
                 .classed(stocks[i].symbol, true)
                 .attr("r", 2)
                 .attr("fill",options.colors[stocks[i].symbol])
+                .attr("title",stocks[i].symbol)
                 .style("opacity", .00001)
                 .on("mouseover", function(d,i){
                     d3.select(this)
@@ -177,12 +178,15 @@ class d3StockChart{
                         .style("opacity", .9);
                     tooltip.transition()
                         .duration(200)
-                        .style("opacity", .9);
+                        .style("opacity", .95)
+                        .style("border-color",options.colors[this.getAttribute("title")]);
                     tooltip.html(
-                        "<h3>tooltip</h3>"
+                        "<h4>" + this.getAttribute("title") + "</h4>" +
+                        "<span>" + d.date + "</span></br>" +
+                        "<span> Close: " + d.closing + "</span></br>"
                     )
-                        .style("left", (d3.event.pageX + 50) + "px")
-                        .style("top", (d3.event.pageY - 40) + "px");
+                        .style("left", (d3.event.pageX + 20) + "px")
+                        .style("top", (d3.event.pageY - 80) + "px");
                 })
                 .on("mouseout", function(d,i){
                     d3.select(this)
@@ -193,7 +197,6 @@ class d3StockChart{
                         .duration(500)
                         .style("opacity", 0);
                 });
-            //.attr("fill",options.colors[stocks[i].symbol])
         }
 
         //update
