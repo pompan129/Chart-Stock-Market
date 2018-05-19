@@ -29,17 +29,14 @@ export function fetchStockData(stockSymbols) {
       //set state to fetching data. Spinner?
       type: FETCHING_STOCK_DATA
     });
-    console.log("stockSymbols", stockSymbols); //todo
 
     //Quandl only allows one request at a time on free accounts
     //came up with this method since Promise.all() sent requests to quickly
     const stockData = [];
     const chainRequests = arr => {
       let index = 0;
-      console.log("chainRequests arr", arr); //todo
       function request() {
         return axios.get(BASE_URL + arr[index] + URL_PARAMS).then(resp => {
-          console.log("axios.get resp", resp); //todo
           stockData.push({
             symbol: arr[index], //resp.data.dataset.dataset_code.toUpperCase(),
             description: resp.data.dataset.name,
@@ -52,7 +49,6 @@ export function fetchStockData(stockSymbols) {
           });
           index++;
           if (index >= arr.length) {
-            console.log("dispatch stockData", stockData); //todo
             dispatch({
               type: ADD_STOCK_DATA,
               payload: stockData
@@ -66,34 +62,6 @@ export function fetchStockData(stockSymbols) {
     };
 
     chainRequests(stockSymbols);
-
-    /*Promise.all(
-      stockSymbols.map(function(stockSymbol) {
-        return axios
-          .get(BASE_URL + stockSymbol + URL_PARAMS)
-          .then(function(resp) {
-            console.log("resp", resp.data); //todo
-            return {
-              symbol: resp.data.dataset.dataset_code.toUpperCase(),
-              description: resp.data.dataset.name,
-              data: resp.data.dataset.data.map(function(stock_day) {
-                return {
-                  date: stock_day[0],
-                  closing: stock_day[4]
-                };
-              })
-            };
-          });
-      })
-    ).then(data => {
-      //give state array of stock information
-      console.log("dispatch", data); //todo
-      dispatch({
-        type: ADD_STOCK_DATA,
-        payload: data
-      });
-    });
-    */
   };
 }
 
